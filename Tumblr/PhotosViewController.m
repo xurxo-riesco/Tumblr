@@ -14,7 +14,6 @@
 @interface PhotosViewController () <UITableViewDataSource, UITableViewDelegate>
 @property (strong, nonatomic) NSArray *posts;
 @property (strong, nonatomic) IBOutlet UITableView *tableView;
-
 @end
 
 @implementation PhotosViewController
@@ -28,26 +27,18 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            if (error != nil) {
-                NSLog(@"%@", [error localizedDescription]);
-            }
-            else {
-                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-                
-                // Get the dictionary from the response key
-                NSDictionary *responseDictionary = dataDictionary[@"response"];
-                // Store the returned array of dictionaries in our posts property
-                self.posts = responseDictionary[@"posts"];
-                NSLog(@"%@", self.posts);
-                
-                [self.tableView reloadData];
-
-                // TODO: Get the posts and store in posts property
-                // TODO: Reload the table view
-            }
-        }];
+        if (error != nil) {
+            NSLog(@"%@", [error localizedDescription]);
+        }else {
+            NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+            NSDictionary *responseDictionary = dataDictionary[@"response"];
+            self.posts = responseDictionary[@"posts"];
+            NSLog(@"%@", self.posts);
+            
+            [self.tableView reloadData];
+        }
+    }];
     [task resume];
-    // Do any additional setup after loading the view.
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return self.posts.count;
@@ -58,17 +49,10 @@
     NSDictionary *post = self.posts[indexPath.row];
     NSArray *photos = post[@"photos"];
     if (photos) {
-       // 1. Get the first photo in the photos array
-       NSDictionary *photo = photos[0];
-
-       // 2. Get the original size dictionary from the photo
-       NSDictionary *originalSize =  photo[@"original_size"];
-
-       // 3. Get the url string from the original size dictionary
-       NSString *urlString = originalSize[@"url"];
-
-       // 4. Create a URL using the urlString
-       NSURL *url = [NSURL URLWithString:urlString];
+        NSDictionary *photo = photos[0];
+        NSDictionary *originalSize =  photo[@"original_size"];
+        NSString *urlString = originalSize[@"url"];
+        NSURL *url = [NSURL URLWithString:urlString];
         [cell.photoView setImageWithURL:url];
         return cell;
     }
@@ -78,13 +62,13 @@
 }
 
 /*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 @end
